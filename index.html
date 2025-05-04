@@ -139,23 +139,62 @@
 </div>
 <script>
   // Получаем токен из URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
 
-  if(token) {
-      // Проверяем токен через API
-      fetch(`http://localhost:5000/check_token?token=${token}`)
-          .then(response => response.json())
-          .then(data => {
-              if(data.valid) {
-                  document.getElementById('content').style.display = 'block';
-              } else {
-                  document.getElementById('error').style.display = 'block';
-              }
-          });
-  } else {
-      document.getElementById('error').style.display = 'block';
-  }
+    if (token) {
+        checkToken(token);
+    } else {
+        showError();
+    }
+});
+
+async function checkToken(token) {
+    try {
+        // Замените URL на ваш Flask-сервер!
+        const response = await fetch('http://ваш-сервер:5000/check_token?token=' + token);
+        const data = await response.json();
+        
+        if (data.valid) {
+            showContent();
+            startTimer(); // Если нужно ограничение по времени
+        } else {
+            showError();
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showError();
+    }
+}
+
+function showContent() {
+    document.getElementById('content').style.display = 'block';
+    document.getElementById('error').style.display = 'none';
+}
+
+function showError() {
+    document.getElementById('content').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+}
+  function startTimer() {
+    let timeLeft = 3600; // 1 час в секундах
+    const timerElement = document.createElement('div');
+    timerElement.id = 'timer';
+    document.getElementById('content').prepend(timerElement);
+
+    const timerId = setInterval(() => {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `Доступ открыт: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerId);
+            showError();
+        }
+    }, 1000);
+}
 </script>
     <div id="app" data-v-app="">
       <div class="ColorScheme_root_XJLuF colorSchemeDark">
