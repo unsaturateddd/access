@@ -195,6 +195,21 @@ function showError() {
         }
     }, 1000);
 }
+  let lastCheck = Date.now();
+
+function checkAccessPeriodically() {
+    fetch(`/check_token?token=${token}`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.valid) {
+                window.location.reload(); // Перезагрузка при истечении
+            }
+        });
+    
+    if (Date.now() - lastCheck < 60000) { 
+        setTimeout(checkAccessPeriodically, 5000); // Проверка каждые 5 сек
+    }
+}
 </script>
     <div id="app" data-v-app="">
       <div class="ColorScheme_root_XJLuF colorSchemeDark">
